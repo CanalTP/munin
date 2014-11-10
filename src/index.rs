@@ -28,7 +28,7 @@ fn push_bulk(s: &mut String, addr: &Addr) {
     s.push('\n');
 }
 
-type CurlResult = Result<curl::http::Response, curl::ErrCode>;
+pub type CurlResult = Result<curl::http::Response, curl::ErrCode>;
 
 pub fn purge_and_create_munin() -> Result<(), curl::ErrCode> {
     use serialize::json::Json;

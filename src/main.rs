@@ -63,13 +63,24 @@ Usage:
     munin query <query>
 ")
 
+fn query(q: &str) -> Result<(), curl::ErrCode> {
+    let query = format!(include_str!("../json/query.json"), query=q);
+    println!("{}", query);
+    let r = try! {
+        curl::http::handle().post("http://localhost:9200/munin/addr/_search?pretty", &*query)
+            .exec()
+    };
+    println!("{}", r);
+    Ok(())
+}
+
 fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
 
     if args.cmd_index {
         index_bano(args.arg_bano_files[]);
     } else if args.cmd_query {
-        println!("query not yet implemented");
+        query(&*args.arg_query).unwrap();
     } else {
         unreachable!();
     }

@@ -9,23 +9,9 @@
                 },
                 "23gram_filter": {
                     "type": "nGram",
-                    "min_gram": "3",
+                    "min_gram": "2",
                     "max_gram": "3",
                     "token_chars": [ "letter", "digit" ]
-                }
-            },
-            "char_filter" : {
-                "accents" : {
-                    "type" : "mapping",
-                    "mappings" : [
-                        "é=>e",
-                        "è=>e",
-                        "ê=>e",
-                        "à=>a",
-                        "â=>a",
-                        "ï=>i",
-                        "ë=>e"
-                    ]
                 }
             },
             "tokenizer": {
@@ -40,8 +26,8 @@
                 "autocomplete": {
                     "type": "custom",
                     "tokenizer": "standard",
-                    "filter": [ "lowercase", "23gram_filter" ],
-                    "char_filter" : [ "accents" ]
+                    "filter": [ "lowercase", "asciifolding", "23gram_filter" ],
+                    "char_filter" : [ ]
                 }
             }
         }
@@ -64,7 +50,7 @@
                         "lon": { "type": "double" }
                     }
                 },
-                "house_number": { "type": "string", "index": "not_analyzed"},
+                "house_number": { "type": "string", "analyzer": "standard"},
                 "id": { "type": "string", "index": "no" },
                 "name": { "type": "string" }
             }
