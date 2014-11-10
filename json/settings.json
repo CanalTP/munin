@@ -1,0 +1,73 @@
+{
+    "settings": {
+        "analysis": {
+            "filter": {
+                "edgengram_filter": { 
+                    "type":     "edge_ngram",
+                    "min_gram": 1,
+                    "max_gram": 20
+                },
+                "23gram_filter": {
+                    "type": "nGram",
+                    "min_gram": "3",
+                    "max_gram": "3",
+                    "token_chars": [ "letter", "digit" ]
+                }
+            },
+            "char_filter" : {
+                "accents" : {
+                    "type" : "mapping",
+                    "mappings" : [
+                        "é=>e",
+                        "è=>e",
+                        "ê=>e",
+                        "à=>a",
+                        "â=>a",
+                        "ï=>i",
+                        "ë=>e"
+                    ]
+                }
+            },
+            "tokenizer": {
+                "23gram_tokenizer": {
+                    "type": "nGram",
+                    "min_gram": "2",
+                    "max_gram": "3",
+                    "token_chars": [ "letter", "digit" ]
+                }
+            },
+            "analyzer": {
+                "autocomplete": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": [ "lowercase", "23gram_filter" ],
+                    "char_filter" : [ "accents" ]
+                }
+            }
+        }
+    },
+    "mappings": {
+        "addr": {
+            "properties": {
+                "addr": { "type": "string", "analyzer": "autocomplete" },
+                "administrative_region": {
+                    "properties": {
+                        "id": { "type": "string", "index": "no" },
+                        "level": { "type": "long", "index": "no" },
+                        "name": { "type": "string" },
+                        "zip_code": { "type": "string", "index": "not_analyzed" }
+                    }
+                },
+                "coord": {
+                    "properties": {
+                        "lat": { "type": "double" },
+                        "lon": { "type": "double" }
+                    }
+                },
+                "house_number": { "type": "string", "index": "not_analyzed"},
+                "id": { "type": "string", "index": "no" },
+                "name": { "type": "string" }
+            }
+        }
+    }        
+}
