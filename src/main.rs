@@ -1,4 +1,4 @@
-#![feature(slicing_syntax, phase)]
+#![feature(slicing_syntax, phase, tuple_indexing)]
 
 extern crate csv;
 extern crate serialize;
@@ -7,41 +7,7 @@ extern crate docopt;
 #[phase(plugin)] extern crate docopt_macros;
 
 mod index;
-
-#[deriving(Decodable, Encodable)]
-struct Bano {
-    id: String,
-    nb: String,
-    street: String,
-    zip: String,
-    city: String,
-    src: String,
-    lat: f64,
-    lon: f64,
-}
-impl Bano {
-    fn insee(&self) -> &str {
-        assert!(self.id.len() >= 5);
-        self.id[..5]
-    }
-    fn into_addr(self) -> index::Addr {
-        let addr = format!("{} {}, {} {}", self.nb, self.street, self.zip, self.city);
-        let admin = index::Admin {
-            id: format!("admin:{}", self.insee()),
-            level: 8,
-            name: self.city,
-            zip_code: self.zip
-        };
-        index::Addr {
-            id: format!("addr:{};{}", self.lat, self.lon),
-            house_number: self.nb,
-            name: self.street,
-            administrative_region: admin,
-            coord: index::Coord { lat: self.lat, lon: self.lon },
-            addr: addr,
-        }
-    }
-}
+mod bano;
 
 fn index_bano(files: &[String]) {
     println!("purge and create Munin...");
@@ -51,7 +17,7 @@ fn index_bano(files: &[String]) {
     for f in files.iter() {
         println!("importing {}...", f);
         let mut rdr = csv::Reader::from_file(&Path::new(f[])).has_headers(false);
-        let iter = rdr.decode().map(|r| { let b: Bano = r.unwrap(); b.into_addr() });
+        let iter = rdr.decode().map(|r| { let b: bano::Bano = r.unwrap(); b.into_addr() });
         let nb = index::index(iter).unwrap();
         println!("importing {}: {} addresses added.", f, nb);
     }

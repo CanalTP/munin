@@ -1,5 +1,6 @@
 {
     "settings": {
+        "number_of_shards": "16",
         "analysis": {
             "filter": {
                 "edgengram_filter": { 
@@ -35,13 +36,24 @@
     "mappings": {
         "addr": {
             "properties": {
-                "addr": { "type": "string", "analyzer": "autocomplete" },
-                "administrative_region": {
+                "id": { "type": "string", "index": "no" },
+                "house_number": { "type": "string", "analyzer": "standard"},
+                "name": { "type": "string", "analyzer": "autocomplete" },
+                "street": {
                     "properties": {
                         "id": { "type": "string", "index": "no" },
-                        "level": { "type": "long", "index": "no" },
+                        "street_name": { "type": "string" },
                         "name": { "type": "string" },
-                        "zip_code": { "type": "string", "index": "not_analyzed" }
+                        "administrative_region": {
+                            "properties": {
+                                "id": { "type": "string", "index": "no" },
+                                "level": { "type": "long", "index": "no" },
+                                "name": { "type": "string" },
+                                "zip_code": { "type": "string", "index": "not_analyzed" },
+                                "weight": { "type": "long" }
+                            }
+                        },
+                        "weight": { "type": "long" }
                     }
                 },
                 "coord": {
@@ -49,10 +61,33 @@
                         "lat": { "type": "double" },
                         "lon": { "type": "double" }
                     }
-                },
-                "house_number": { "type": "string", "analyzer": "standard"},
+                }
+            }
+        },
+        "street": {
+            "properties": {
                 "id": { "type": "string", "index": "no" },
-                "name": { "type": "string" }
+                "street_name": { "type": "string" },
+                "name": { "type": "string", "analyzer": "autocomplete" },
+                "administrative_region": {
+                    "properties": {
+                        "id": { "type": "string", "index": "no" },
+                        "level": { "type": "long", "index": "no" },
+                        "name": { "type": "string" },
+                        "zip_code": { "type": "string", "index": "not_analyzed" },
+                        "weight": { "type": "long" }
+                    }
+                },
+                "weight": { "type": "long" }
+            }
+        },
+        "administrative_region": {
+            "properties": {
+                "id": { "type": "string", "index": "no" },
+                "level": { "type": "long", "index": "no" },
+                "name": { "type": "string", "analyzer": "autocomplete" },
+                "zip_code": { "type": "string", "index": "not_analyzed" },
+                "weight": { "type": "long" }
             }
         }
     }        
