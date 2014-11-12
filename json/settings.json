@@ -3,31 +3,34 @@
         "number_of_shards": "16",
         "analysis": {
             "filter": {
-                "edgengram_filter": { 
+                "prefix_filter": { 
                     "type":     "edge_ngram",
                     "min_gram": 1,
                     "max_gram": 20
                 },
-                "23gram_filter": {
+                "ngram_filter": {
                     "type": "nGram",
                     "min_gram": "2",
-                    "max_gram": "3",
-                    "token_chars": [ "letter", "digit" ]
-                }
-            },
-            "tokenizer": {
-                "23gram_tokenizer": {
-                    "type": "nGram",
-                    "min_gram": "2",
-                    "max_gram": "3",
-                    "token_chars": [ "letter", "digit" ]
+                    "max_gram": "3"
                 }
             },
             "analyzer": {
-                "autocomplete": {
+                "word": {
                     "type": "custom",
                     "tokenizer": "standard",
-                    "filter": [ "lowercase", "asciifolding", "23gram_filter" ],
+                    "filter": [ "lowercase", "asciifolding" ],
+                    "char_filter" : [ ]
+                },
+                "prefix": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": [ "lowercase", "asciifolding", "prefix_filter" ],
+                    "char_filter" : [ ]
+                },
+                "ngram": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": [ "lowercase", "asciifolding", "ngram_filter" ],
                     "char_filter" : [ ]
                 }
             }
@@ -37,8 +40,19 @@
         "addr": {
             "properties": {
                 "id": { "type": "string", "index": "no" },
-                "house_number": { "type": "string", "analyzer": "standard"},
-                "name": { "type": "string", "analyzer": "autocomplete" },
+                "house_number": { "type": "string", "analyzer": "word"},
+                "name": {
+                    "type": "string",
+                    "analyzer": "word",
+                    "fields": {
+                        "prefix": {
+                            "type": "string",
+                            "index_analyzer": "prefix",
+                            "search_analyzer": "word"
+                        },
+                        "ngram": { "type": "string", "analyzer": "ngram" }
+                    }
+                },
                 "street": {
                     "properties": {
                         "id": { "type": "string", "index": "no" },
@@ -68,7 +82,18 @@
             "properties": {
                 "id": { "type": "string", "index": "no" },
                 "street_name": { "type": "string" },
-                "name": { "type": "string", "analyzer": "autocomplete" },
+                "name": {
+                    "type": "string",
+                    "analyzer": "word",
+                    "fields": {
+                        "prefix": {
+                            "type": "string",
+                            "index_analyzer": "prefix",
+                            "search_analyzer": "word"
+                        },
+                        "ngram": { "type": "string", "analyzer": "ngram" }
+                    }
+                },
                 "administrative_region": {
                     "properties": {
                         "id": { "type": "string", "index": "no" },
@@ -85,7 +110,18 @@
             "properties": {
                 "id": { "type": "string", "index": "no" },
                 "level": { "type": "long", "index": "no" },
-                "name": { "type": "string", "analyzer": "autocomplete" },
+                "name": {
+                    "type": "string",
+                    "analyzer": "word",
+                    "fields": {
+                        "prefix": {
+                            "type": "string",
+                            "index_analyzer": "prefix",
+                            "search_analyzer": "word"
+                        },
+                        "ngram": { "type": "string", "analyzer": "ngram" }
+                    }
+                },
                 "zip_code": { "type": "string", "index": "not_analyzed" },
                 "weight": { "type": "long" }
             }

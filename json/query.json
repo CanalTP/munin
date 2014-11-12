@@ -8,8 +8,33 @@
                     }}
                 }},
                 {{
-                    "match": {{
-                        "name": "{query}"
+                    "bool": {{
+                        "should": [
+                            {{
+                                "match": {{
+                                    "name": {{
+                                        "query": "{query}",
+                                        "boost": 100
+                                    }}
+                                }}
+                            }},
+                            {{
+                                "match": {{
+                                    "name.prefix": {{
+                                        "query": "{query}",
+                                        "boost": 10
+                                    }}
+                                }}
+                            }},
+                            {{
+                                "match": {{
+                                    "name.ngram": {{
+                                        "query": "{query}",
+                                        "boost": 1
+                                    }}
+                                }}
+                            }}
+                        ]
                     }}
                 }}
             ]
