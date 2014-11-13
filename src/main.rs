@@ -33,7 +33,7 @@ fn query(q: &str) -> Result<(), curl::ErrCode> {
     let query = format!(include_str!("../json/query.json"), query=q);
     println!("{}", query);
     let r = try! {
-        curl::http::handle().post("http://localhost:9200/munin/addr/_search?pretty", &*query)
+        curl::http::handle().post("http://localhost:9200/munin/_search?pretty", query[])
             .exec()
     };
     println!("{}", r);

@@ -44,6 +44,7 @@ impl Bano {
             street: street,
             name: addr_name,
             coord: index::Coord { lat: self.lat, lon: self.lon },
+            weight: 1,
         }
     }
 }

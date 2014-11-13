@@ -10,7 +10,7 @@
                 },
                 "ngram_filter": {
                     "type": "nGram",
-                    "min_gram": "2",
+                    "min_gram": "3",
                     "max_gram": "3"
                 }
             },
@@ -43,14 +43,16 @@
                 "house_number": { "type": "string", "analyzer": "word"},
                 "name": {
                     "type": "string",
+                    "index_options": "docs",
                     "analyzer": "word",
                     "fields": {
                         "prefix": {
                             "type": "string",
+                            "index_options": "docs",
                             "index_analyzer": "prefix",
                             "search_analyzer": "word"
                         },
-                        "ngram": { "type": "string", "analyzer": "ngram" }
+                        "ngram": { "type": "string", "index_options": "docs", "analyzer": "ngram" }
                     }
                 },
                 "street": {
@@ -84,14 +86,16 @@
                 "street_name": { "type": "string" },
                 "name": {
                     "type": "string",
+                    "index_options": "docs",
                     "analyzer": "word",
                     "fields": {
                         "prefix": {
                             "type": "string",
+                            "index_options": "docs",
                             "index_analyzer": "prefix",
                             "search_analyzer": "word"
                         },
-                        "ngram": { "type": "string", "analyzer": "ngram" }
+                        "ngram": { "type": "string", "index_options": "docs", "analyzer": "ngram" }
                     }
                 },
                 "administrative_region": {
@@ -112,14 +116,16 @@
                 "level": { "type": "long", "index": "no" },
                 "name": {
                     "type": "string",
+                    "index_options": "docs",
                     "analyzer": "word",
                     "fields": {
                         "prefix": {
                             "type": "string",
+                            "index_options": "docs",
                             "index_analyzer": "prefix",
                             "search_analyzer": "word"
                         },
-                        "ngram": { "type": "string", "analyzer": "ngram" }
+                        "ngram": { "type": "string", "index_options": "docs", "analyzer": "ngram" }
                     }
                 },
                 "zip_code": { "type": "string", "index": "not_analyzed" },

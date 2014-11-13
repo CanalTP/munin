@@ -1,43 +1,35 @@
 {{
     "query": {{
-        "bool": {{
-            "must": [
-                {{
-                    "match": {{
-                        "house_number": "{query}"
-                    }}
-                }},
-                {{
-                    "bool": {{
-                        "should": [
-                            {{
-                                "match": {{
-                                    "name": {{
-                                        "query": "{query}",
-                                        "boost": 100
-                                    }}
-                                }}
-                            }},
-                            {{
-                                "match": {{
-                                    "name.prefix": {{
-                                        "query": "{query}",
-                                        "boost": 10
-                                    }}
-                                }}
-                            }},
-                            {{
-                                "match": {{
-                                    "name.ngram": {{
-                                        "query": "{query}",
-                                        "boost": 1
-                                    }}
-                                }}
-                            }}
-                        ]
-                    }}
+        "filtered": {{
+            "query": {{
+                "function_score": {{
+                    "query": {{
+                        "multi_match": {{
+                            "type": "most_fields",
+                            "query": "{query}",
+                            "fields": [ "name.prefix^100", "name.ngram" ]
+                        }}
+                    }}//,
+                    //"field_value_factor": {{
+                    //    "field": "weight",
+                    //    "modifier": "log1p",
+                    //    "factor": 0.001
+                    //}},
+                    //"boost_mode": "sum"
                 }}
-            ]
+            }},
+            "filter": {{
+                "or": {{
+                    "filters": [
+                        {{ "missing": {{ "field": "house_number" }} }},
+                        {{
+                            "query": {{
+                                "match": {{ "house_number": "{query}" }}
+                            }}
+                        }}
+                    ]
+                }}
+            }}
         }}
     }}
 }}

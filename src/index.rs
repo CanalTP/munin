@@ -45,6 +45,7 @@ pub struct Addr {
     pub street: Street,
     pub name: String,
     pub coord: Coord,
+    pub weight: uint,
 }
 
 pub type CurlResult = Result<curl::http::Response, curl::ErrCode>;
