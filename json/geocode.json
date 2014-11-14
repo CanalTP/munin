@@ -1,0 +1,28 @@
+{{
+    "sort" : [
+        {{
+            "_geo_distance" : {{
+                "coord" : {{ "lat": {lat}, "lon": {lon} }},
+                "order" : "asc",
+                "unit" : "m"
+            }}
+        }}
+    ],
+    "query": {{
+        "filtered": {{
+            "query": {{
+                "match_all": {{ }}
+            }},
+            "filter": {{
+                "geohash_cell" : {{
+                    "coord" : {{
+                        "lat" : {lat},
+                        "lon" : {lon}
+                    }},
+                    "precision" : "1km",
+                    "neighbors": true
+                }}
+            }}
+        }}
+    }}
+}}

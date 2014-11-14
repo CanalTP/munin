@@ -73,10 +73,10 @@
                     }
                 },
                 "coord": {
-                    "properties": {
-                        "lat": { "type": "double" },
-                        "lon": { "type": "double" }
-                    }
+                    "type": "geo_point",
+                    "lat_lon": true,
+                    "geohash_prefix": true,
+                    "geohash_precision": "1m"
                 }
             }
         },

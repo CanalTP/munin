@@ -27,7 +27,8 @@ docopt!(Args deriving Show, "
 Usage:
     munin index <bano-files>...
     munin query <query>
-")
+    munin geocode [--] <lon> <lat>
+", arg_lon: Option<f64>, arg_lat: Option<f64>)
 
 fn query(q: &str) -> Result<(), curl::ErrCode> {
     let query = format!(include_str!("../json/query.json"), query=q);
@@ -40,13 +41,26 @@ fn query(q: &str) -> Result<(), curl::ErrCode> {
     Ok(())
 }
 
+fn geocode(lon: f64, lat: f64) -> Result<(), curl::ErrCode> {
+    let query = format!(include_str!("../json/geocode.json"), lon=lon, lat=lat);
+    println!("{}", query);
+    let r = try! {
+        curl::http::handle().post("http://localhost:9200/munin/addr/_search?pretty&size=1", query[])
+            .exec()
+    };
+    println!("{}", r);
+    Ok(())
+}
+
 fn main() {
     let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
 
     if args.cmd_index {
         index_bano(args.arg_bano_files[]);
     } else if args.cmd_query {
-        query(&*args.arg_query).unwrap();
+        query(args.arg_query[]).unwrap();
+    } else if args.cmd_geocode {
+        geocode(args.arg_lon.unwrap(), args.arg_lat.unwrap()).unwrap();
     } else {
         unreachable!();
     }
