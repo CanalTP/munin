@@ -110,7 +110,7 @@
                 "weight": { "type": "long" }
             }
         },
-        "administrative_region": {
+        "admin": {
             "properties": {
                 "id": { "type": "string", "index": "no" },
                 "level": { "type": "long", "index": "no" },

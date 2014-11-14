@@ -2,29 +2,66 @@
     "query": {{
         "filtered": {{
             "query": {{
-                "function_score": {{
-                    "query": {{
-                        "multi_match": {{
-                            "type": "most_fields",
-                            "query": "{query}",
-                            "fields": [ "name.prefix^100", "name.ngram" ]
+                "bool": {{
+                    "should": [
+                        {{
+                            "term": {{
+                                "_type": {{
+                                    "value": "addr",
+                                    "boost": 1000
+                                }}
+                            }}
+                        }},
+                        {{
+                            "match": {{
+                                "name.prefix": {{
+                                    "query": "{query}",
+                                    "boost": 100
+                                }}
+                            }}
+                        }},
+                        {{
+                            "match": {{
+                                "name.ngram": {{
+                                    "query": "{query}",
+                                    "boost": 1
+                                }}
+                            }}
+                        }},
+                        {{
+                            "function_score": {{
+                                "query": {{ "match_all": {{ }} }},
+                                "field_value_factor": {{
+                                    "field": "weight",
+                                    "modifier": "log1p",
+                                    "factor": 1
+                                }},
+                                "boost_mode": "multiply",
+                                "boost": 30
+                            }}
                         }}
-                    }}//,
-                    //"field_value_factor": {{
-                    //    "field": "weight",
-                    //    "modifier": "log1p",
-                    //    "factor": 0.001
-                    //}},
-                    //"boost_mode": "sum"
+                    ]
                 }}
             }},
             "filter": {{
-                "or": {{
-                    "filters": [
+                "bool": {{
+                    "should": [
                         {{ "missing": {{ "field": "house_number" }} }},
                         {{
                             "query": {{
                                 "match": {{ "house_number": "{query}" }}
+                            }}
+                        }}
+                    ],
+                    "must": [
+                        {{
+                            "query": {{
+                                "match": {{
+                                    "name.ngram": {{
+                                        "query": "{query}",
+                                        "minimum_should_match": "50%"
+                                    }}
+                                }}
                             }}
                         }}
                     ]
