@@ -15,7 +15,7 @@
                         {{
                             "match": {{
                                 "name.prefix": {{
-                                    "query": "{query}",
+                                    "query": {query},
                                     "boost": 100
                                 }}
                             }}
@@ -23,7 +23,7 @@
                         {{
                             "match": {{
                                 "name.ngram": {{
-                                    "query": "{query}",
+                                    "query": {query},
                                     "boost": 1
                                 }}
                             }}
@@ -49,7 +49,7 @@
                         {{ "missing": {{ "field": "house_number" }} }},
                         {{
                             "query": {{
-                                "match": {{ "house_number": "{query}" }}
+                                "match": {{ "house_number": {query} }}
                             }}
                         }}
                     ],
@@ -58,7 +58,7 @@
                             "query": {{
                                 "match": {{
                                     "name.ngram": {{
-                                        "query": "{query}",
+                                        "query": {query},
                                         "minimum_should_match": "50%"
                                     }}
                                 }}
