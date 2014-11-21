@@ -4,11 +4,11 @@ name = "munin"
 version = "0.0.1"
 authors = ["Guillaume Pinot <texitoi@texitoi.eu>"]
 
-[dependencies.rust-csv]
-git = "git://github.com/BurntSushi/rust-csv"
+[dependencies.csv]
+git = "https://github.com/BurntSushi/rust-csv"
 
 [dependencies.curl]
-git = "git://github.com/carllerche/curl-rust"
+git = "https://github.com/carllerche/curl-rust"
 
 [dependencies.docopt_macros]
-git = "git://github.com/docopt/docopt.rs"
+git = "https://github.com/docopt/docopt.rs"
