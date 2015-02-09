@@ -4,11 +4,9 @@ name = "munin"
 version = "0.0.1"
 authors = ["Guillaume Pinot <texitoi@texitoi.eu>"]
 
-[dependencies.csv]
-git = "https://github.com/BurntSushi/rust-csv"
-
-[dependencies.curl]
-git = "https://github.com/carllerche/curl-rust"
-
-[dependencies.docopt_macros]
-git = "https://github.com/docopt/docopt.rs"
+[dependencies]
+docopt = "*"
+rustc-serialize = "*"
+docopt_macros = "*"
+csv = "*"
+curl = "*"

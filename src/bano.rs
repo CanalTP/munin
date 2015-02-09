@@ -16,7 +16,7 @@
 
 use index;
 
-#[deriving(Decodable, Encodable)]
+#[derive(RustcDecodable, RustcEncodable)]
 pub struct Bano {
     pub id: String,
     pub nb: String,
@@ -30,11 +30,11 @@ pub struct Bano {
 impl Bano {
     pub fn insee(&self) -> &str {
         assert!(self.id.len() >= 5);
-        self.id[..5]
+        &self.id[..5]
     }
     pub fn fantoir(&self) -> &str {
         assert!(self.id.len() >= 10);
-        self.id[..10]
+        &self.id[..10]
     }
     pub fn into_addr(self) -> index::Addr {
         let street_name = format!("{}, {} {}", self.street, self.zip, self.city);
