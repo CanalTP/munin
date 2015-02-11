@@ -41,7 +41,10 @@ fn index_bano(files: &[String]) {
 
 fn to_json_string(s: &str) -> String {
     // TODO: escape string!
-    s.to_string()
+    let mut res = "\"".to_string();
+    res.push_str(s);
+    res.push_str("\"");
+    res
 }
 
 fn query(q: &str) -> Result<(), curl::ErrCode> {
