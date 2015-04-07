@@ -14,7 +14,6 @@
 // License along with this program. If not, see
 // <http://www.gnu.org/licenses/>.
 
-use rustc_serialize;
 use rustc_serialize::json;
 use rustc_serialize::Encodable;
 use curl;
