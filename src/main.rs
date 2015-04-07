@@ -31,7 +31,7 @@ fn index_bano(files: &[String]) {
 
     for f in files.iter() {
         println!("importing {}...", f);
-        let mut rdr = csv::Reader::from_file(&Path::new(&*f)).unwrap().has_headers(false);
+        let mut rdr = csv::Reader::from_file(&Path::new(&f)).unwrap().has_headers(false);
         let iter = rdr.decode().map(|r| { let b: bano::Bano = r.unwrap(); b.into_addr() });
         let nb = index::index(iter).unwrap();
         println!("importing {}: {} addresses added.", f, nb);
@@ -47,10 +47,10 @@ fn to_json_string(s: &str) -> String {
 }
 
 fn query(q: &str) -> Result<(), curl::ErrCode> {
-    let query = format!(include_str!("../json/query.json"), query=&*to_json_string(q));
+    let query = format!(include_str!("../json/query.json"), query=&to_json_string(q));
     println!("{}", query);
     let r = try! {
-        curl::http::handle().post("http://localhost:9200/munin/_search?pretty", &*query)
+        curl::http::handle().post("http://localhost:9200/munin/_search?pretty", &query)
             .exec()
     };
     println!("{}", r);
@@ -61,7 +61,7 @@ fn geocode(lon: f64, lat: f64) -> Result<(), curl::ErrCode> {
     let query = format!(include_str!("../json/geocode.json"), lon=lon, lat=lat);
     println!("{}", query);
     let r = try! {
-        curl::http::handle().post("http://localhost:9200/munin/addr/_search?pretty&size=1", &*query)
+        curl::http::handle().post("http://localhost:9200/munin/addr/_search?pretty&size=1", &query)
             .exec()
     };
     println!("{}", r);
@@ -91,9 +91,9 @@ fn main() {
         .unwrap_or_else(|e| e.exit());
 
     if args.cmd_index {
-        index_bano(&*args.arg_bano_files);
+        index_bano(&args.arg_bano_files);
     } else if args.cmd_query {
-        query(&*args.arg_query).unwrap();
+        query(&args.arg_query).unwrap();
     } else if args.cmd_geocode {
         geocode(args.arg_lon.unwrap(), args.arg_lat.unwrap()).unwrap();
     } else {

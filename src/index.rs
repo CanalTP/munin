@@ -37,7 +37,7 @@ pub struct Admin {
     pub weight: u32,
 }
 impl Incr for Admin {
-    fn id(&self) -> &str { &*self.id }
+    fn id(&self) -> &str { &self.id }
     fn incr(&mut self) { self.weight += 1; }
 }
 
@@ -50,7 +50,7 @@ pub struct Street {
     pub weight: u32,
 }
 impl Incr for Street {
-    fn id(&self) -> &str { &*self.id }
+    fn id(&self) -> &str { &self.id }
     fn incr(&mut self) { self.weight += 1; }
 }
 
@@ -80,7 +80,7 @@ pub fn purge_and_create_munin() -> Result<(), curl::ErrCode> {
 
 fn push_bulk<'a, T: Encodable>(s: &mut String, elt: &T) {
     s.push_str("{index: {}}\n");
-    s.push_str(&*json::encode(elt).unwrap());
+    s.push_str(&json::encode(elt).unwrap());
     s.push('\n');
 }
 fn bulk_index<'a, T, I>(url: &str, mut iter: I) -> Result<u32, curl::ErrCode>
@@ -99,7 +99,7 @@ fn bulk_index<'a, T, I>(url: &str, mut iter: I) -> Result<u32, curl::ErrCode>
             push_bulk(&mut chunk, &addr);
             nb += 1;
         }
-        let res = try!(handle.post(&*url, &*chunk).exec());
+        let res = try!(handle.post(&*url, &chunk).exec());
         assert!(res.get_code() != 201, format!("result of bulk insert is not 201: {}", res));
     }
     Ok(nb)
