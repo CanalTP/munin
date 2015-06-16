@@ -45,16 +45,9 @@ fn index_bano(files: &[String]) {
     }
 }
 
-fn to_json_string(s: &str) -> String {
-    // TODO: escape string!
-    let mut res = "\"".to_string();
-    res.push_str(s);
-    res.push_str("\"");
-    res
-}
-
 fn query(q: &str) -> Result<curl::http::Response, curl::ErrCode> {
-    let query = format!(include_str!("../json/query.json"), query=&to_json_string(q));
+    use rustc_serialize::json::Json::String;
+    let query = format!(include_str!("../json/query.json"), query=String(q.to_string()));
     println!("{}", query);
     let resp = curl::http::handle()
         .post("http://localhost:9200/munin/_search?pretty", &query)
