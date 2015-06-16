@@ -18,11 +18,18 @@ extern crate csv;
 extern crate rustc_serialize;
 extern crate curl;
 extern crate docopt;
+extern crate iron;
+extern crate urlencoded;
 
 mod index;
 mod bano;
 
 use std::path::Path;
+use iron::prelude::*;
+use iron::headers::ContentType;
+use iron::status;
+use urlencoded::UrlEncodedQuery;
+use rustc_serialize::json::Json;
 
 fn index_bano(files: &[String]) {
     println!("purge and create Munin...");
@@ -46,15 +53,13 @@ fn to_json_string(s: &str) -> String {
     res
 }
 
-fn query(q: &str) -> Result<(), curl::ErrCode> {
+fn query(q: &str) -> Result<curl::http::Response, curl::ErrCode> {
     let query = format!(include_str!("../json/query.json"), query=&to_json_string(q));
     println!("{}", query);
-    let r = try! {
-        curl::http::handle().post("http://localhost:9200/munin/_search?pretty", &query)
-            .exec()
-    };
-    println!("{}", r);
-    Ok(())
+    let resp = curl::http::handle()
+        .post("http://localhost:9200/munin/_search?pretty", &query)
+        .exec();
+    resp
 }
 
 fn geocode(lon: f64, lat: f64) -> Result<(), curl::ErrCode> {
@@ -68,11 +73,89 @@ fn geocode(lon: f64, lat: f64) -> Result<(), curl::ErrCode> {
     Ok(())
 }
 
+fn make_obj(v: Vec<(&'static str, Json)>) -> Json {
+    use rustc_serialize::json::Json::Object;
+    Object(v.into_iter().map(|(k, v)| (k.to_string(), v)).collect())
+}
+
+fn make_feature(json: &Json) -> Json {
+    use rustc_serialize::json::Json::*;
+
+    make_obj(vec![
+        ("properties", make_obj(vec![
+            ("country", String("France".to_string())),
+            ("housenumber", json.find("house_number")
+                                .map(|j| j.clone())
+                                .unwrap_or(Null)),
+            ("street", json.find("street")
+                           .and_then(|s| s.find("street_name"))
+                           .map(|j| j.clone())
+                           .unwrap_or(Null)),
+            ("postcode", json.find("street")
+                             .and_then(|s| s.find("administrative_region"))
+                             .and_then(|s| s.find("zip_code"))
+                             .map(|j| j.clone())
+                             .unwrap_or(Null)),
+            ("city", json.find("street")
+                         .and_then(|s| s.find("administrative_region"))
+                         .and_then(|s| s.find("name"))
+                         .map(|j| j.clone())
+                         .unwrap_or(Null))
+            ])),
+        ("type", String("Feature".to_string())),
+        ("geometry", make_obj(vec![
+            ("type", String("Point".to_string())),
+            ("coordinates", Array(vec![
+                json.find("coord")
+                    .and_then(|j| j.find("lon"))
+                    .map(|j| j.clone())
+                    .unwrap_or(Null),
+                json.find("coord")
+                    .and_then(|j| j.find("lat"))
+                    .map(|j| j.clone())
+                    .unwrap_or(Null)
+                ]))
+            ])),
+        ])
+}
+
+fn handle_query(req: &mut Request) -> IronResult<Response> {
+    use rustc_serialize::json::Json::*;
+
+    let map = req.get_ref::<UrlEncodedQuery>().unwrap();
+    let q = map.get("q").and_then(|v| v.get(0)).unwrap();
+    let es = query(q).unwrap();
+    let es = Json::from_str(std::str::from_utf8(es.get_body()).unwrap()).unwrap();
+    let sources: Vec<_> = es.find("hits")
+        .and_then(|hs| hs.find("hits"))
+        .and_then(|hs| hs.as_array())
+        .map(|hs| hs.iter()
+             .filter_map(|h| h.find("_source"))
+             .map(|s| make_feature(s)))
+        .unwrap()
+        .collect();
+    let json = make_obj(vec![
+        ("type", String("FeatureCollection".to_string())),
+        ("version", String("0.1.0".to_string())),
+        ("query", String(q.clone())),
+        ("feature", Array(sources))
+    ]);
+
+    let mut resp = Response::with((status::Ok, format!("{}", json.pretty())));
+    resp.headers.set(ContentType("application/json".parse().unwrap()));
+    Ok(resp)
+}
+
+fn runserver() {
+    Iron::new(handle_query).http("0.0.0.0:3000").unwrap();
+}
+
 #[derive(RustcDecodable, Debug)]
 struct Args {
     cmd_index: bool,
     cmd_query: bool,
     cmd_geocode: bool,
+    cmd_runserver: bool,
     arg_bano_files: Vec<String>,
     arg_query: String,
     arg_lon: Option<f64>,
@@ -83,6 +166,7 @@ Usage:
     munin index <bano-files>...
     munin query <query>
     munin geocode [--] <lon> <lat>
+    munin runserver
 ";
 
 fn main() {
@@ -93,11 +177,12 @@ fn main() {
     if args.cmd_index {
         index_bano(&args.arg_bano_files);
     } else if args.cmd_query {
-        query(&args.arg_query).unwrap();
+        println!("{}", query(&args.arg_query).unwrap());
     } else if args.cmd_geocode {
         geocode(args.arg_lon.unwrap(), args.arg_lat.unwrap()).unwrap();
+    } else if args.cmd_runserver {
+        runserver();
     } else {
         unreachable!();
     }
-
 }
