@@ -83,7 +83,9 @@ fn make_feature(json: &Json) -> Json {
 
     make_obj(vec![
         ("properties", make_obj(vec![
-            ("country", String("France".to_string())),
+            ("label", json.find("name")
+                          .map(|j| j.clone())
+                          .unwrap_or(Null)),
             ("housenumber", json.find("house_number")
                                 .map(|j| j.clone())
                                 .unwrap_or(Null)),
@@ -100,7 +102,8 @@ fn make_feature(json: &Json) -> Json {
                          .and_then(|s| s.find("administrative_region"))
                          .and_then(|s| s.find("name"))
                          .map(|j| j.clone())
-                         .unwrap_or(Null))
+                         .unwrap_or(Null)),
+            ("country", String("France".to_string()))
             ])),
         ("type", String("Feature".to_string())),
         ("geometry", make_obj(vec![
