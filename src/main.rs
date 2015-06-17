@@ -49,6 +49,12 @@ fn index_bano(files: &[String]) {
 
 fn query(q: &str) -> Result<curl::http::Response, curl::ErrCode> {
     use rustc_serialize::json::Json::String;
+    let query = format!(include_str!("../json/query_exact.json"), query=String(q.to_string()));
+    let resp = try!(curl::http::handle()
+                    .post("http://localhost:9200/munin/_search?pretty", &query)
+                    .exec());
+    let body = Json::from_str(std::str::from_utf8(resp.get_body()).unwrap()).unwrap();
+    if body["hits"]["total"].as_u64().unwrap() > 0 { return Ok(resp); }
     let query = format!(include_str!("../json/query.json"), query=String(q.to_string()));
     let resp = curl::http::handle()
         .post("http://localhost:9200/munin/_search?pretty", &query)
