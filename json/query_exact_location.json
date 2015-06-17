@@ -22,14 +22,19 @@
                         }},
                         {{
                             "function_score": {{
-                                "query": {{ "match_all": {{ }} }},
-                                "field_value_factor": {{
-                                    "field": "weight",
-                                    "modifier": "log1p",
-                                    "factor": 1
-                                }},
+                                "functions": [
+                                    {{
+                                        "gauss": {{
+                                            "coord": {{ 
+                                                "origin": {{ "lat": {lat}, "lon": {lon} }},
+                                                "offset": "2km",
+                                                "scale":  "3km"
+                                            }}
+                                        }}
+                                    }}
+                                ],
                                 "boost_mode": "multiply",
-                                "boost": 30
+                                "boost": 300
                             }}
                         }}
                     ]
