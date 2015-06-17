@@ -6,6 +6,7 @@ dependencies = [
  "curl 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "docopt 0.6.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "iron 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mdo 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "urlencoded 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -185,6 +186,11 @@ dependencies = [
 [[package]]
 name = "matches"
 version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "mdo"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]

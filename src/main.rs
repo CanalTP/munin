@@ -20,6 +20,7 @@ extern crate curl;
 extern crate docopt;
 extern crate iron;
 extern crate urlencoded;
+#[macro_use] extern crate mdo;
 
 mod index;
 mod bano;
@@ -48,7 +49,6 @@ fn index_bano(files: &[String]) {
 fn query(q: &str) -> Result<curl::http::Response, curl::ErrCode> {
     use rustc_serialize::json::Json::String;
     let query = format!(include_str!("../json/query.json"), query=String(q.to_string()));
-    println!("{}", query);
     let resp = curl::http::handle()
         .post("http://localhost:9200/munin/_search?pretty", &query)
         .exec();
@@ -57,7 +57,6 @@ fn query(q: &str) -> Result<curl::http::Response, curl::ErrCode> {
 
 fn geocode(lon: f64, lat: f64) -> Result<(), curl::ErrCode> {
     let query = format!(include_str!("../json/geocode.json"), lon=lon, lat=lat);
-    println!("{}", query);
     let r = try! {
         curl::http::handle().post("http://localhost:9200/munin/addr/_search?pretty&size=1", &query)
             .exec()
@@ -73,19 +72,32 @@ fn make_obj(v: Vec<(&'static str, Json)>) -> Json {
 
 fn make_feature(json: &Json) -> Json {
     use rustc_serialize::json::Json::*;
+    use mdo::option::{bind, ret};
 
+    let street = mdo! {
+        s =<< json.find("street");
+        s =<< s.find("street_name");
+        ret ret(s.clone())
+    }.unwrap_or(Null);
+    let house_number = mdo! {
+        nb =<< json.find("house_number");
+        ret ret(nb.clone())
+    }.unwrap_or(Null);
+    let name = mdo! {
+        let house_number = &house_number;
+        let street = &street;
+        nb =<< house_number.as_string();
+        s =<< street.as_string();
+        ret ret(String(format!("{} {}", nb, s)))
+    }.unwrap_or(Null);
     make_obj(vec![
         ("properties", make_obj(vec![
             ("label", json.find("name")
                           .map(|j| j.clone())
                           .unwrap_or(Null)),
-            ("housenumber", json.find("house_number")
-                                .map(|j| j.clone())
-                                .unwrap_or(Null)),
-            ("street", json.find("street")
-                           .and_then(|s| s.find("street_name"))
-                           .map(|j| j.clone())
-                           .unwrap_or(Null)),
+            ("name", name),
+            ("housenumber", house_number),
+            ("street", street),
             ("postcode", json.find("street")
                              .and_then(|s| s.find("administrative_region"))
                              .and_then(|s| s.find("zip_code"))
@@ -134,7 +146,7 @@ fn handle_query(req: &mut Request) -> IronResult<Response> {
         ("type", String("FeatureCollection".to_string())),
         ("version", String("0.1.0".to_string())),
         ("query", String(q.clone())),
-        ("feature", Array(sources))
+        ("features", Array(sources))
     ]);
 
     let mut resp = Response::with((status::Ok, format!("{}", json.pretty())));
