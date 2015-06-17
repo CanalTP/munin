@@ -31,6 +31,7 @@ use iron::headers::ContentType;
 use iron::status;
 use urlencoded::UrlEncodedQuery;
 use rustc_serialize::json::Json;
+use index::Coord;
 
 fn index_bano(files: &[String]) {
     println!("purge and create Munin...");
@@ -49,6 +50,18 @@ fn index_bano(files: &[String]) {
 fn query(q: &str) -> Result<curl::http::Response, curl::ErrCode> {
     use rustc_serialize::json::Json::String;
     let query = format!(include_str!("../json/query.json"), query=String(q.to_string()));
+    let resp = curl::http::handle()
+        .post("http://localhost:9200/munin/_search?pretty", &query)
+        .exec();
+    resp
+}
+
+fn query_location(q: &str, coord: &Coord) -> Result<curl::http::Response, curl::ErrCode> {
+    use rustc_serialize::json::Json::String;
+    let query = format!(include_str!("../json/query_location.json"),
+                        query=String(q.to_string()),
+                        lon=coord.lon,
+                        lat=coord.lat);
     let resp = curl::http::handle()
         .post("http://localhost:9200/munin/_search?pretty", &query)
         .exec();
@@ -129,10 +142,24 @@ fn make_feature(json: &Json) -> Json {
 
 fn handle_query(req: &mut Request) -> IronResult<Response> {
     use rustc_serialize::json::Json::*;
+    use mdo::option::{bind, ret};
 
     let map = req.get_ref::<UrlEncodedQuery>().unwrap();
     let q = map.get("q").and_then(|v| v.get(0)).unwrap();
-    let es = query(q).unwrap();
+    let coord = mdo! {
+        lons =<< map.get("lon");
+        lon =<< lons.get(0);
+        lon =<< std::str::FromStr::from_str(lon).ok();
+        lats =<< map.get("lat");
+        lat =<< lats.get(0);
+        lat =<< std::str::FromStr::from_str(lat).ok();
+        ret ret(Coord { lon: lon, lat: lat })
+    };
+    let es = if let Some(ref coord) = coord {
+        query_location(q, coord)
+    } else {
+        query(q)
+    }.unwrap();
     let es = Json::from_str(std::str::from_utf8(es.get_body()).unwrap()).unwrap();
     let sources: Vec<_> = es.find("hits")
         .and_then(|hs| hs.find("hits"))
