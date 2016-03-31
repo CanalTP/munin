@@ -24,7 +24,7 @@ cd ..
 ```
 and then index bano:
 ```shell
-curl -O http://bano.openstreetmap.fr/data/BANO-France-20140901-csv.zip
+curl -O http://bano.openstreetmap.fr/data/old_2014/BANO-France-20140901-csv.zip
 unzip BANO-France-20140901-csv.zip
 ./munin/target/release/munin index bano-data*/bano-*.csv
 ```
